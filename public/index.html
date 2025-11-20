@@ -1,61 +1,52 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HubSpot Quick Reporter</title>
+  <meta charset="UTF-8" />
+  <title>CTA Reporting</title>
 </head>
+
 <body>
-  <h2>HubSpot Quick Reporter</h2>
 
-  <label>Base URL del servidor</label>
-  <input id="base" placeholder="https://tu-app.onrender.com" />
+  <h2>HubSpot CTA Reporting</h2>
 
-  <h3>Consultar CTA</h3>
-  <input id="ctaId" placeholder="CTA ID" />
+  <label>Base URL del servidor</label><br>
+  <input id="base-url" value="https://test-v8qp.onrender.com" style="width:400px;"><br><br>
+
+  <label>ID del CTA</label><br>
+  <input id="cta-id" placeholder="Ej: 197697674877" style="width:400px;"><br><br>
+
+  <label>Filtrar por URL (opcional)</label><br>
+  <input id="filter-url" placeholder="https://midominio.com/pagina" style="width:400px;"><br><br>
+
   <button onclick="callCta()">Consultar</button>
 
-  <h3>CTA por URL</h3>
-  <input id="ctaId2" placeholder="CTA ID" />
-  <input id="pageUrl" placeholder="URL exacta" />
-  <input id="from" type="date" />
-  <input id="to" type="date" />
-  <button onclick="callCtaUrl()">Consultar</button>
+  <pre id="result"></pre>
 
-  <h3>Evento</h3>
-  <input id="eventId" placeholder="Event ID" />
-  <input id="efrom" type="date" />
-  <input id="eto" type="date" />
-  <button onclick="callEvent()">Consultar</button>
+  <script>
+    async function callCta() {
+      const base = document.getElementById("base-url").value.trim();   // ✔ Declarada ANTES del uso
+      const ctaId = document.getElementById("cta-id").value.trim();
+      const filterUrl = document.getElementById("filter-url").value.trim();
 
-  <div id="out"></div>
+      if (!base || !ctaId) {
+        alert("Colocá la Base URL y el CTA ID");
+        return;
+      }
 
-<script>
-function show(obj){ document.getElementById("out").innerHTML = "<pre>"+JSON.stringify(obj,null,2)+"</pre>"; }
+      let endpoint = `${base}/cta/${ctaId}`;
+      if (filterUrl) {
+        endpoint += `?url=${encodeURIComponent(filterUrl)}`;
+      }
 
-async function callCta(){
-  const base = base.value.trim(); const id = ctaId.value.trim();
-  const r = await fetch(base+"/cta?id="+id); show(await r.json());
-}
+      try {
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("result").textContent = "Error: " + err.message;
+      }
+    }
+  </script>
 
-async function callCtaUrl(){
-  const base = document.getElementById("base").value.trim();
-  const qs = new URLSearchParams({
-    id: document.getElementById("ctaId2").value.trim(),
-    url: document.getElementById("pageUrl").value.trim()
-  });
-  const f=document.getElementById("from").value, t=document.getElementById("to").value;
-  if(f) qs.set("from", f); if(t) qs.set("to", t);
-  const r = await fetch(base+"/cta/url?"+qs.toString()); show(await r.json());
-}
-
-async function callEvent(){
-  const base=document.getElementById("base").value.trim();
-  const qs=new URLSearchParams({ id: document.getElementById("eventId").value.trim() });
-  const f=document.getElementById("efrom").value, t=document.getElementById("eto").value;
-  if(f) qs.set("from", f); if(t) qs.set("to", t);
-  const r = await fetch(base+"/event?"+qs.toString()); show(await r.json());
-}
-</script>
 </body>
 </html>
