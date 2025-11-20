@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HubSpot Quick Reporter</title>
+</head>
+<body>
+  <h2>HubSpot Quick Reporter</h2>
+
+  <label>Base URL del servidor</label>
+  <input id="base" placeholder="https://tu-app.onrender.com" />
+
+  <h3>Consultar CTA</h3>
+  <input id="ctaId" placeholder="CTA ID" />
+  <button onclick="callCta()">Consultar</button>
+
+  <h3>CTA por URL</h3>
+  <input id="ctaId2" placeholder="CTA ID" />
+  <input id="pageUrl" placeholder="URL exacta" />
+  <input id="from" type="date" />
+  <input id="to" type="date" />
+  <button onclick="callCtaUrl()">Consultar</button>
+
+  <h3>Evento</h3>
+  <input id="eventId" placeholder="Event ID" />
+  <input id="efrom" type="date" />
+  <input id="eto" type="date" />
+  <button onclick="callEvent()">Consultar</button>
+
+  <div id="out"></div>
+
+<script>
+function show(obj){ document.getElementById("out").innerHTML = "<pre>"+JSON.stringify(obj,null,2)+"</pre>"; }
+
+async function callCta(){
+  const base = base.value.trim(); const id = ctaId.value.trim();
+  const r = await fetch(base+"/cta?id="+id); show(await r.json());
+}
+
+async function callCtaUrl(){
+  const base = document.getElementById("base").value.trim();
+  const qs = new URLSearchParams({
+    id: document.getElementById("ctaId2").value.trim(),
+    url: document.getElementById("pageUrl").value.trim()
+  });
+  const f=document.getElementById("from").value, t=document.getElementById("to").value;
+  if(f) qs.set("from", f); if(t) qs.set("to", t);
+  const r = await fetch(base+"/cta/url?"+qs.toString()); show(await r.json());
+}
+
+async function callEvent(){
+  const base=document.getElementById("base").value.trim();
+  const qs=new URLSearchParams({ id: document.getElementById("eventId").value.trim() });
+  const f=document.getElementById("efrom").value, t=document.getElementById("eto").value;
+  if(f) qs.set("from", f); if(t) qs.set("to", t);
+  const r = await fetch(base+"/event?"+qs.toString()); show(await r.json());
+}
+</script>
+</body>
+</html>
