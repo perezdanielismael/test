@@ -24,7 +24,7 @@
 
   <script>
     async function callCta() {
-      const base = document.getElementById("base-url").value.trim();   // ✔ Declarada ANTES del uso
+      const base = document.getElementById("base-url").value.trim().replace(/\/$/, "");
       const ctaId = document.getElementById("cta-id").value.trim();
       const filterUrl = document.getElementById("filter-url").value.trim();
 
@@ -33,9 +33,12 @@
         return;
       }
 
-      let endpoint = `${base}/cta/${ctaId}`;
+      let endpoint;
+
       if (filterUrl) {
-        endpoint += `?url=${encodeURIComponent(filterUrl)}`;
+        endpoint = `${base}/cta/url?id=${ctaId}&url=${encodeURIComponent(filterUrl)}`;
+      } else {
+        endpoint = `${base}/cta?id=${ctaId}`;
       }
 
       try {
